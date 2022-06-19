@@ -11,6 +11,8 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     TaskCheckBox: typeof import('./src/components/home/TaskCheckBox.vue')['default']
     TaskList: typeof import('./src/components/home/TaskList.vue')['default']
+    TextField: typeof import('./src/components/includes/TextField.vue')['default']
+    VanButton: typeof import('vant/es')['Button']
     VanCell: typeof import('vant/es')['Cell']
     VanCellGroup: typeof import('vant/es')['CellGroup']
     VanIcon: typeof import('vant/es')['Icon']

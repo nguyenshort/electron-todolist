@@ -2,9 +2,7 @@ import { release } from 'os'
 import { join } from 'path'
 
 import { app, BrowserWindow, shell, ipcMain } from 'electron'
-import { initialize as initializeRemote } from '@electron/remote/main';
-
-import './init'
+import initDatabase from "./database";
 
 // import { BrowserWindow } from '@electron/remote/browser-window'
 // Disable GPU Acceleration for Windows 7
@@ -20,6 +18,23 @@ if (!app.requestSingleInstanceLock()) {
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
 let win: BrowserWindow | null = null
+
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.focus()
+    }
+  })
+
+  // Create myWindow, load the rest of the app, etc...
+  app.on('ready', () => {
+  })
+}
 // Here, you can also use other preload
 const splash = join(__dirname, '../preload/splash.js')
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin
@@ -27,11 +42,16 @@ const url = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_D
 
 async function createWindow() {
 
-  initializeRemote()
+  // Init remote
+  require('@electron/remote/main').initialize()
+
+  // conect database Realm by MongoDb
+  await initDatabase()
 
   win = new BrowserWindow({
     title: 'Main window',
-    width: 400,
+    width: 1000,
+    height: 1000,
     webPreferences: {
       plugins: true,
       preload: splash,
@@ -46,7 +66,7 @@ async function createWindow() {
     win.loadFile(join(__dirname, '../../index.html'))
   } else {
     win.loadURL(url)
-    // win.webContents.openDevTools()
+    win.webContents.openDevTools()
   }
 
   // Test active push message to Renderer-process
@@ -56,9 +76,25 @@ async function createWindow() {
 
   // Make all links open with the browser, not with the application
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('https:')) shell.openExternal(url)
-    return { action: 'deny' }
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        // frame: false,
+        titleBarStyle: 'hidden',
+        fullscreenable: false,
+        webPreferences: {
+          plugins: true,
+          preload: splash,
+          nodeIntegration: true,
+          contextIsolation: false,
+          backgroundThrottling: false,
+          webSecurity: false
+        },
+      }
+    }
   })
+
+  require("@electron/remote/main").enable(win.webContents);
 }
 
 app.whenReady().then(createWindow)

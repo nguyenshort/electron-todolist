@@ -1,9 +1,14 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 
 let routes: RouteRecordRaw[] = [
     {
         path: '/',
         component: () => import('./pages/index.vue')
+    },
+    // Modal
+    {
+        path: '/modal/add-task',
+        component: () => import('./pages/modals/AddTaskModal.vue')
     }
 ]
 

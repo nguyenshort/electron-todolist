@@ -1,9 +1,4 @@
 <template>
-
-  <div>
-    Remote: {{ remote }}
-  </div>
-
   <div class="task-list">
     <ul>
       <li
@@ -27,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import remote from '@electron/remote'
+const ipcRenderer = require('electron').ipcRenderer
 
 import {useTasksStore} from "../../store/tasks";
 import {ITask, TaskStatusEnum} from "../../models/tasks";
@@ -55,7 +50,7 @@ const toggleTask = (task: ITask) => {
 }
 
 onMounted(() => {
-  console.log(remote)
+  // console.log(ipcRenderer)
 })
 
 </script>
